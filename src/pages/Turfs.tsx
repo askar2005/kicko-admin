@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ const getTurfImage = (turf: any) => {
             if (Array.isArray(parsed) && parsed.length > 0) {
                 const img = parsed[0];
                 if (img.startsWith('/uploads')) {
-                    return `http://localhost:5000${img}`;
+                    return `http://https://aqua-mandrill-716221.hostingersite.com${img}`;
                 }
                 return img;
             }
@@ -29,6 +30,7 @@ const getTurfImage = (turf: any) => {
 };
 
 export function Turfs() {
+    const navigate = useNavigate();
     const [turfs, setTurfs] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState("Pending");
 
@@ -115,7 +117,10 @@ export function Turfs() {
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
         >
-            <Card className="hover:shadow-md transition-shadow overflow-hidden group">
+            <Card
+                className={`overflow-hidden group ${turf.status === "APPROVED" ? "hover:shadow-md transition-shadow cursor-pointer" : "hover:shadow-md transition-shadow"}`}
+                onClick={turf.status === "APPROVED" ? () => navigate(`/app/turfs/${turf.id}`) : undefined}
+            >
                 <div className="h-40 overflow-hidden relative">
                     <img
                         src={getTurfImage(turf)}
@@ -149,10 +154,10 @@ export function Turfs() {
                 </CardContent>
                 {turf.status === "PENDING" && (
                     <CardFooter className="px-4 pb-4 pt-0 gap-3">
-                        <Button className="w-full" variant="outline" onClick={() => handleApprove(turf.id)}>
+                        <Button className="w-full" variant="outline" onClick={(e) => { e.stopPropagation(); handleApprove(turf.id); }}>
                             <Check className="h-4 w-4 mr-2" /> Accept Turf
                         </Button>
-                        <Button className="w-full" variant="destructive" onClick={() => handleRejectInit(turf.id)}>
+                        <Button className="w-full" variant="destructive" onClick={(e) => { e.stopPropagation(); handleRejectInit(turf.id); }}>
                             <X className="h-4 w-4 mr-2" /> Reject Turf
                         </Button>
                     </CardFooter>

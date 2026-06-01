@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "@/store/useStore";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,23 +10,60 @@ import { Label } from "@/components/ui/input";
 import { format } from "date-fns";
 import { Download, RefreshCcw } from "lucide-react";
 
+type PaymentRecord = {
+    id: string;
+    bookingRef: string;
+    userName: string;
+    userEmail: string;
+    turfName: string;
+    date: string;
+    timeSlot: string;
+    amount: number;
+    status: string;
+    createdAt: string;
+};
+
 export function Finance() {
     const { settlements, triggerRefund } = useStore();
-
-    const mockPayments = [
-        { id: "p1", booking: "#1021", user: "Askar", amount: 500, status: "Paid" },
-        { id: "p2", booking: "#1022", user: "Rahul", amount: 1200, status: "Paid" },
-        { id: "p3", booking: "#1023", user: "Priya", amount: 800, status: "Paid" }
-    ];
+    const [payments, setPayments] = useState<PaymentRecord[]>([]);
+    const [loadingPayments, setLoadingPayments] = useState(true);
     const [refundModalOpen, setRefundModalOpen] = useState(false);
     const [refundAmount, setRefundAmount] = useState("");
     const [refundReason, setRefundReason] = useState("");
     const [refundError, setRefundError] = useState("");
 
+    useEffect(() => {
+        const loadPayments = async () => {
+            setLoadingPayments(true);
+            try {
+                const res = await fetch("http://localhost:5000/api/bookings/admin/payments");
+                if (!res.ok) {
+                    throw new Error("Failed to load payment records");
+                }
+
+                const data = await res.json();
+                setPayments(Array.isArray(data) ? data : []);
+            } catch {
+                setPayments([]);
+            } finally {
+                setLoadingPayments(false);
+            }
+        };
+
+        loadPayments();
+    }, []);
+
     const handleDownloadCSV = (type: string) => {
         let data = "id,name,amount\n";
-        if (type === "revenue") data += "1,MonthlyRevenue,4500\n";
-        else if (type === "statements") data += "1,KickoArena,1250\n";
+        if (type === "revenue") {
+            const total = payments.reduce((sum, payment) => sum + payment.amount, 0);
+            data += `1,MonthlyRevenue,${total}\n`;
+        } else if (type === "statements") {
+            data += payments.map((payment) => `${payment.id},${payment.turfName},${payment.amount}`).join("\n");
+            if (payments.length > 0) {
+                data += "\n";
+            }
+        }
 
         const blob = new Blob([data], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
@@ -158,37 +195,58 @@ export function Finance() {
                             <TableRow>
                                 <TableHead>Booking</TableHead>
                                 <TableHead>User</TableHead>
+                                <TableHead>Turf</TableHead>
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Action</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {mockPayments.map((p) => (
-                                <TableRow key={p.id}>
-                                    <TableCell className="font-medium">{p.booking}</TableCell>
-                                    <TableCell>{p.user}</TableCell>
-                                    <TableCell>₹{p.amount}</TableCell>
-                                    <TableCell>
-                                        <Badge variant="success">
-                                            {p.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setRefundAmount(p.amount.toString());
-                                                setRefundReason(`Refund for ${p.booking}`);
-                                                setRefundModalOpen(true);
-                                            }}
-                                        >
-                                            Refund
-                                        </Button>
+                            {loadingPayments ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                                        Loading payment records...
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ) : payments.length > 0 ? (
+                                payments.map((p) => (
+                                    <TableRow key={p.id}>
+                                        <TableCell className="font-medium">{p.bookingRef}</TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col">
+                                                <span>{p.userName}</span>
+                                                <span className="text-xs text-muted-foreground">{p.userEmail}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{p.turfName}</TableCell>
+                                        <TableCell>₹{p.amount}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="success">
+                                                {p.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setRefundAmount(p.amount.toString());
+                                                    setRefundReason(`Refund for ${p.bookingRef} - ${p.turfName}`);
+                                                    setRefundModalOpen(true);
+                                                }}
+                                            >
+                                                Refund
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                                        No payment records found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

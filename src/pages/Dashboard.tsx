@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/store/useStore";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { generateRevenueData, generateBookingVolume } from "@/mock/data";
@@ -10,19 +10,74 @@ import { motion } from "framer-motion";
 export function Dashboard() {
     const { users, turfs, settlements } = useStore();
     const [dateRange, setDateRange] = useState("30");
+    const [analytics, setAnalytics] = useState<{
+        revenueData: Array<{ name: string; revenue: number }>;
+        bookingData: Array<{ name: string; bookings: number }>;
+        summary: {
+            activeUsers: number;
+            approvedTurfs: number;
+            pendingSettlements: number;
+            refundRatio: string;
+        };
+    }>({
+        revenueData: generateRevenueData(),
+        bookingData: generateBookingVolume(),
+        summary: {
+            activeUsers: 0,
+            approvedTurfs: 0,
+            pendingSettlements: 0,
+            refundRatio: "0.0%",
+        },
+    });
 
-    const revenueData = useMemo(() => generateRevenueData(), [dateRange]);
-    const bookingData = useMemo(() => generateBookingVolume(), [dateRange]);
+    useEffect(() => {
+        const loadAnalytics = async () => {
+            try {
+                const res = await fetch(`http://localhost:5000/api/admin/dashboard-metrics?range=${dateRange}`);
+                if (!res.ok) {
+                    return;
+                }
 
-    const activeUsersCount = users.filter(u => u.status === "Active").length;
-    const pendingSettlements = settlements.filter(s => s.status === "Pending").length;
-    const approvedTurfs = turfs.filter(t => t.status === "approved").length;
+                const data = await res.json();
+                setAnalytics({
+                    revenueData: Array.isArray(data.revenueData) ? data.revenueData : generateRevenueData(),
+                    bookingData: Array.isArray(data.bookingData) ? data.bookingData : generateBookingVolume(),
+                    summary: {
+                        activeUsers: Number(data?.summary?.activeUsers || 0),
+                        approvedTurfs: Number(data?.summary?.approvedTurfs || 0),
+                        pendingSettlements: Number(data?.summary?.pendingSettlements || 0),
+                        refundRatio: String(data?.summary?.refundRatio || "0.0%"),
+                    },
+                });
+            } catch {
+                setAnalytics({
+                    revenueData: generateRevenueData(),
+                    bookingData: generateBookingVolume(),
+                    summary: {
+                        activeUsers: 0,
+                        approvedTurfs: 0,
+                        pendingSettlements: 0,
+                        refundRatio: "0.0%",
+                    },
+                });
+            }
+        };
+
+        loadAnalytics();
+    }, [dateRange]);
+
+    const revenueData = useMemo(() => analytics.revenueData, [analytics.revenueData]);
+    const bookingData = useMemo(() => analytics.bookingData, [analytics.bookingData]);
+
+    const activeUsersCount = analytics.summary.activeUsers || users.filter(u => u.status === "Active").length;
+    const pendingSettlements = analytics.summary.pendingSettlements || settlements.filter(s => s.status === "Pending").length;
+    const approvedTurfs = analytics.summary.approvedTurfs || turfs.filter(t => t.status === "approved").length;
 
     const kpis = [
         { title: "Active Users", value: activeUsersCount, icon: Users, color: "text-blue-500", bg: "bg-blue-50" },
         { title: "Approved Turfs", value: approvedTurfs, icon: MapIcon, color: "text-green-500", bg: "bg-green-50" },
         { title: "Pending Settlements", value: pendingSettlements, icon: RefreshCw, color: "text-amber-500", bg: "bg-amber-50" },
-        { title: "Refund Ratio", value: "2.4%", icon: BarChart3, color: "text-purple-500", bg: "bg-purple-50" },
+        { title: "Refund Ratio", value: analytics.summary.refundRatio, icon: BarChart3, color: "text-purple-500", bg: "bg-purple-50" },
     ];
 
     return (

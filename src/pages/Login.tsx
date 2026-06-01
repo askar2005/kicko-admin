@@ -104,7 +104,7 @@ export function Login() {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Failed to reset password");
-            
+
             // Success
             setForgotStep("none");
             setIsLogin(true);
@@ -137,9 +137,9 @@ export function Login() {
                                 {forgotStep !== 'none' ? "Reset Password" : "Kicko Admin"}
                             </CardTitle>
                             <CardDescription>
-                                {forgotStep === 'email' ? "Enter your email to receive a reset code" : 
-                                 forgotStep === 'reset' ? "Enter the verification code and new password" : 
-                                 isLogin ? "Enter your credentials to access the console" : "Register a new admin account"}
+                                {forgotStep === 'email' ? "Enter your email to receive a reset code" :
+                                    forgotStep === 'reset' ? "Enter the verification code and new password" :
+                                        isLogin ? "Enter your credentials to access the console" : "Register a new admin account"}
                             </CardDescription>
                         </CardHeader>
                         {forgotStep === 'email' ? (
@@ -212,78 +212,78 @@ export function Login() {
                                 </Button>
                             </div>
                         ) : (
-                        <form onSubmit={handleSubmit}>
-                            <CardContent className="space-y-4 pt-4">
-                                {!isLogin && (
+                            <form onSubmit={handleSubmit}>
+                                <CardContent className="space-y-4 pt-4">
+                                    {!isLogin && (
+                                        <div className="space-y-2">
+                                            <Label htmlFor="adminName">Admin Name</Label>
+                                            <Input
+                                                id="adminName"
+                                                type="text"
+                                                placeholder="John Doe"
+                                                value={adminName}
+                                                onChange={(e) => setAdminName(e.target.value)}
+                                                required={!isLogin}
+                                            />
+                                        </div>
+                                    )}
                                     <div className="space-y-2">
-                                        <Label htmlFor="adminName">Admin Name</Label>
+                                        <Label htmlFor="email">Email</Label>
                                         <Input
-                                            id="adminName"
-                                            type="text"
-                                            placeholder="John Doe"
-                                            value={adminName}
-                                            onChange={(e) => setAdminName(e.target.value)}
-                                            required={!isLogin}
+                                            id="email"
+                                            type="email"
+                                            placeholder="admin@kicko.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
                                         />
                                     </div>
-                                )}
-                                <div className="space-y-2">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        placeholder="admin@kicko.com"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                {!isLogin && (
+                                    {!isLogin && (
+                                        <div className="space-y-2">
+                                            <Label htmlFor="mobileNumber">Mobile Number</Label>
+                                            <Input
+                                                id="mobileNumber"
+                                                type="tel"
+                                                placeholder="+1 234 567 8900"
+                                                value={mobileNumber}
+                                                onChange={(e) => setMobileNumber(e.target.value)}
+                                                required={!isLogin}
+                                            />
+                                        </div>
+                                    )}
                                     <div className="space-y-2">
-                                        <Label htmlFor="mobileNumber">Mobile Number</Label>
+                                        <div className="flex justify-between items-center">
+                                            <Label htmlFor="password">Password</Label>
+                                            {isLogin && (
+                                                <Button variant="link" className="p-0 h-auto text-xs" type="button" onClick={() => setForgotStep('email')}>
+                                                    Forgot Password?
+                                                </Button>
+                                            )}
+                                        </div>
                                         <Input
-                                            id="mobileNumber"
-                                            type="tel"
-                                            placeholder="+1 234 567 8900"
-                                            value={mobileNumber}
-                                            onChange={(e) => setMobileNumber(e.target.value)}
-                                            required={!isLogin}
+                                            id="password"
+                                            type="password"
+                                            placeholder="••••••••"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
                                         />
                                     </div>
-                                )}
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <Label htmlFor="password">Password</Label>
-                                        {isLogin && (
-                                            <Button variant="link" className="p-0 h-auto text-xs" type="button" onClick={() => setForgotStep('email')}>
-                                                Forgot Password?
-                                            </Button>
-                                        )}
-                                    </div>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        placeholder="••••••••"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                {error && (
-                                    <p className={`text-sm text-center font-medium ${error.includes('successfully') ? 'text-primary' : 'text-destructive'}`}>
-                                        {error}
-                                    </p>
-                                )}
-                            </CardContent>
-                            <CardFooter className="flex flex-col gap-3">
-                                <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading}>
-                                    {loading ? "Processing..." : isLogin ? "Login" : "Register"}
-                                </Button>
-                                <Button variant="ghost" type="button" onClick={() => { setIsLogin(!isLogin); setError(""); }} className="w-full">
-                                    {isLogin ? "Don't have an account? Register" : "Already have an account? Login"}
-                                </Button>
-                            </CardFooter>
-                        </form>
+                                    {error && (
+                                        <p className={`text-sm text-center font-medium ${error.includes('successfully') ? 'text-primary' : 'text-destructive'}`}>
+                                            {error}
+                                        </p>
+                                    )}
+                                </CardContent>
+                                <CardFooter className="flex flex-col gap-3">
+                                    <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading}>
+                                        {loading ? "Processing..." : isLogin ? "Login" : "Register"}
+                                    </Button>
+                                    <Button variant="ghost" type="button" onClick={() => { setIsLogin(!isLogin); setError(""); }} className="w-full">
+                                        {isLogin ? "Don't have an account? Register" : "Already have an account? Login"}
+                                    </Button>
+                                </CardFooter>
+                            </form>
                         )}
                     </Card>
                 </motion.div>

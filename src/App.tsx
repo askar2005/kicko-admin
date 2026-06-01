@@ -9,6 +9,7 @@ import { Finance } from "@/pages/Finance";
 import { Audit } from "@/pages/Audit";
 import { Security } from "@/pages/Security";
 import { Settings } from "@/pages/Settings";
+import { TurfView } from "@/pages/TurfView";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route path="users" element={<Users />} />
             <Route path="turfs" element={<Turfs />} />
             <Route path="finance" element={<Finance />} />
+            <Route path="turfs/:turfId" element={<TurfView />} />
             <Route path="audit" element={<Audit />} />
             <Route path="security" element={<Security />} />
             <Route path="settings" element={<Settings />} />
