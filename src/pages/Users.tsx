@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useStore } from "@/store/useStore";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -51,8 +51,8 @@ export function Users() {
 
             <Card>
                 <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4">
-                    <div className="flex gap-4">
-                        <div className="relative w-64">
+                    <div className="flex flex-col sm:flex-row gap-4 w-full">
+                        <div className="relative w-full sm:w-64">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Search name, email, phone..."
@@ -61,7 +61,7 @@ export function Users() {
                                 className="pl-9"
                             />
                         </div>
-                        <div className="w-32">
+                        <div className="w-full sm:w-32">
                             <Select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
                                 <option value="All">All Roles</option>
                                 <option value="Admin">Admin</option>
@@ -119,7 +119,7 @@ export function Users() {
                                             {format(new Date(user.joinedDate), "MMM dd, yyyy")}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2 text-muted-foreground">
+                                            <div className="flex justify-end gap-2 text-muted-foreground min-w-max">
                                                 <button
                                                     className="p-2 hover:text-primary transition-colors"
                                                     title="View Login Devices"
@@ -162,13 +162,13 @@ export function Users() {
                 <div className="space-y-4 pt-2">
                     {/* Mock devices list */}
                     {[1, 2].map((i) => (
-                        <div key={i} className="flex items-center justify-between p-3 rounded-lg border bg-muted/50">
+                        <div key={i} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 rounded-lg border bg-muted/50">
                             <div className="flex items-center gap-3">
                                 <MonitorSmartphone className="h-8 w-8 text-muted-foreground" />
                                 <div className="flex flex-col">
                                     <span className="font-semibold text-sm">{i === 1 ? "MacBook Pro - Chrome" : "iPhone 13 - Safari"}</span>
                                     <span className="text-xs text-muted-foreground">
-                                        Last active: {i === 1 ? "Just now" : "2 hours ago"} • IP: {i === 1 ? "192.168.1.10" : "172.20.10.4"}
+                                        Last active: {i === 1 ? "Just now" : "2 hours ago"} â€¢ IP: {i === 1 ? "192.168.1.10" : "172.20.10.4"}
                                     </span>
                                 </div>
                             </div>
@@ -183,3 +183,4 @@ export function Users() {
         </div>
     );
 }
+

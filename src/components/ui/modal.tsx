@@ -1,4 +1,4 @@
-import * as React from "react"
+﻿import * as React from "react"
 import { X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -25,7 +25,7 @@ export function Modal({ isOpen, onClose, title, description, children }: ModalPr
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -37,7 +37,7 @@ export function Modal({ isOpen, onClose, title, description, children }: ModalPr
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className="z-50 w-full max-w-lg rounded-2xl bg-card p-6 shadow-soft mx-4"
+                        className="z-50 w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-card p-5 sm:p-6 shadow-soft"
                     >
                         <div className="flex flex-col space-y-1.5 text-center sm:text-left mb-4">
                             <div className="flex items-center justify-between">
@@ -60,3 +60,4 @@ export function Modal({ isOpen, onClose, title, description, children }: ModalPr
         </AnimatePresence>
     )
 }
+

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -183,7 +183,7 @@ export function Turfs() {
                         <p className="font-medium">{format(new Date(turf.createdAt || new Date()), "MMM dd, yyyy")}</p>
                     </div>
                 </CardContent>
-                <CardFooter className="px-4 pb-4 pt-0 gap-3">
+                <CardFooter className="px-4 pb-4 pt-0 gap-3 flex-col sm:flex-row">
                     {turf.status === "PENDING" ? (
                         <>
                             <Button className="w-full" variant="outline" onClick={(e) => { e.stopPropagation(); handleApprove(turf.id); }}>
@@ -222,7 +222,7 @@ export function Turfs() {
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-6 overflow-x-auto pb-1">
                     <TabsList>
                         <TabsTrigger value="Pending">Pending ({pendingTurfs.length})</TabsTrigger>
                         <TabsTrigger value="Approved">Approved</TabsTrigger>
@@ -238,7 +238,7 @@ export function Turfs() {
                             <p className="text-muted-foreground text-sm">All caught up! There are no turfs waiting for approval.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                             <AnimatePresence>
                                 {pendingTurfs.map(t => <TurfCard key={t.id} turf={t} />)}
                             </AnimatePresence>
@@ -247,7 +247,7 @@ export function Turfs() {
                 </TabsContent>
 
                 <TabsContent value="Approved" className="mt-0">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                         <AnimatePresence>
                             {approvedTurfs.map(t => <TurfCard key={t.id} turf={t} />)}
                         </AnimatePresence>
@@ -255,7 +255,7 @@ export function Turfs() {
                 </TabsContent>
 
                 <TabsContent value="Rejected" className="mt-0">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                         <AnimatePresence>
                             {rejectedTurfs.map(t => <TurfCard key={t.id} turf={t} />)}
                         </AnimatePresence>
@@ -281,7 +281,7 @@ export function Turfs() {
                         />
                         {rejectError && <p className="text-xs text-destructive">{rejectError}</p>}
                     </div>
-                    <div className="flex justify-end gap-3 pt-4">
+                    <div className="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4">
                         <Button variant="outline" onClick={() => setRejectModalOpen(false)}>Cancel</Button>
                         <Button variant="destructive" onClick={submitReject}>Confirm Rejection</Button>
                     </div>
@@ -290,3 +290,4 @@ export function Turfs() {
         </div>
     );
 }
+
