@@ -8,7 +8,7 @@ import { Modal } from "@/components/ui/modal";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/input";
-import { Store, MapPin, Check, X, Building2 } from "lucide-react";
+import { Store, MapPin, Check, X, Building2, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const getTurfImage = (turf: any) => {
@@ -38,6 +38,7 @@ export function Turfs() {
     const [selectedTurfId, setSelectedTurfId] = useState<string | null>(null);
     const [rejectReason, setRejectReason] = useState("");
     const [rejectError, setRejectError] = useState("");
+    const [deletingTurfId, setDeletingTurfId] = useState<string | null>(null);
 
     const fetchTurfs = async () => {
         try {
@@ -109,6 +110,36 @@ export function Turfs() {
         }
     };
 
+    const handleDeleteTurf = async (id: string) => {
+        const confirmDelete = window.confirm("Are you sure you want to remove this turf? This will delete its bookings and reviews too.");
+        if (!confirmDelete) return;
+
+        try {
+            setDeletingTurfId(id);
+            const token = localStorage.getItem("admin_token");
+            const headers: any = {};
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+
+            const res = await fetch(`http://localhost:5000/api/turfs/${id}`, {
+                method: "DELETE",
+                headers
+            });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || "Failed to delete turf");
+            }
+
+            fetchTurfs();
+        } catch (e) {
+            console.error("Delete turf failed", e);
+        } finally {
+            setDeletingTurfId(null);
+        }
+    };
+
     const TurfCard = ({ turf }: { turf: typeof turfs[0] }) => (
         <motion.div
             layout
@@ -152,16 +183,33 @@ export function Turfs() {
                         <p className="font-medium">{format(new Date(turf.createdAt || new Date()), "MMM dd, yyyy")}</p>
                     </div>
                 </CardContent>
-                {turf.status === "PENDING" && (
-                    <CardFooter className="px-4 pb-4 pt-0 gap-3">
-                        <Button className="w-full" variant="outline" onClick={(e) => { e.stopPropagation(); handleApprove(turf.id); }}>
-                            <Check className="h-4 w-4 mr-2" /> Accept Turf
-                        </Button>
-                        <Button className="w-full" variant="destructive" onClick={(e) => { e.stopPropagation(); handleRejectInit(turf.id); }}>
-                            <X className="h-4 w-4 mr-2" /> Reject Turf
-                        </Button>
-                    </CardFooter>
-                )}
+                <CardFooter className="px-4 pb-4 pt-0 gap-3">
+                    {turf.status === "PENDING" ? (
+                        <>
+                            <Button className="w-full" variant="outline" onClick={(e) => { e.stopPropagation(); handleApprove(turf.id); }}>
+                                <Check className="h-4 w-4 mr-2" /> Accept Turf
+                            </Button>
+                            <Button className="w-full" variant="destructive" onClick={(e) => { e.stopPropagation(); handleRejectInit(turf.id); }}>
+                                <X className="h-4 w-4 mr-2" /> Reject Turf
+                            </Button>
+                        </>
+                    ) : (
+                        <div className="flex w-full gap-3">
+                            <Button
+                                className="w-full"
+                                variant="destructive"
+                                disabled={deletingTurfId === turf.id}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    void handleDeleteTurf(turf.id);
+                                }}
+                            >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                {deletingTurfId === turf.id ? "Removing..." : "Remove Turf"}
+                            </Button>
+                        </div>
+                    )}
+                </CardFooter>
             </Card>
         </motion.div>
     );
