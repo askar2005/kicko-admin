@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/store/useStore";
@@ -55,7 +55,8 @@ export function Login() {
             }
 
             // Success, update store
-            login(data.email);
+            localStorage.setItem("admin_profile", JSON.stringify(data));
+            login(data.email, data.name, data.id);
             verify2fa(data.token);
             navigate("/app/dashboard", { replace: true });
         } catch (err: any) {
@@ -263,7 +264,7 @@ export function Login() {
                                         <Input
                                             id="password"
                                             type="password"
-                                            placeholder="••••••••"
+                                            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             required
@@ -291,3 +292,5 @@ export function Login() {
         </div>
     );
 }
+
+

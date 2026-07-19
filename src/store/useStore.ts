@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import type {
     User, Turf, Settlement, DeviceSession, AuditLog
 } from '@/mock/data';
@@ -23,7 +23,7 @@ interface AppState {
     sessionExpiry: number; // in minutes
     sessions: DeviceSession[];
 
-    login: (email: string) => void;
+    login: (email: string, name?: string, id?: string) => void;
     verify2fa: (token?: string) => void;
     logout: () => void;
     setSessionExpiry: (minutes: number) => void;
@@ -56,7 +56,16 @@ interface AppState {
 }
 
 export const useStore = create<AppState>((set, get) => ({
-    user: checkSession() ? { id: "admin-default", name: "Super Admin", email: localStorage.getItem("admin_email") || "admin@kicko.com", role: "Admin", status: "Active", joinedDate: new Date().toISOString() } as User : null,
+    user: checkSession() ? (() => {
+        const profileStr = localStorage.getItem("admin_profile");
+        if (profileStr) {
+            try {
+                const profile = JSON.parse(profileStr);
+                return { id: profile.id || "admin-default", name: profile.name || "Super Admin", email: profile.email || localStorage.getItem("admin_email") || "admin@kicko.com", role: "Admin", status: "Active", joinedDate: new Date().toISOString() } as User;
+            } catch {}
+        }
+        return { id: "admin-default", name: "Super Admin", email: localStorage.getItem("admin_email") || "admin@kicko.com", role: "Admin", status: "Active", joinedDate: new Date().toISOString() } as User;
+    })() : null,
     isAuthenticated: checkSession(),
     is2faVerified: checkSession(),
     sessionExpiry: 15,
@@ -69,12 +78,12 @@ export const useStore = create<AppState>((set, get) => ({
 
     toastMessage: null,
 
-    login: (email) => {
+    login: (email, name, id) => {
         let user = get().users.find(u => u.email === email);
         if (!user) {
-            user = { id: "u-demo", name: email.split("@")[0], email, role: "Admin", status: "Active", joinedDate: new Date().toISOString() } as User;
+            user = { id: id || "admin-default", name: name || email.split("@")[0], email, role: "Admin", status: "Active", joinedDate: new Date().toISOString() } as User;
         }
-        set({ user, isAuthenticated: true, is2faVerified: false });
+        set({ user: { ...user, id: id || user.id, name: name || user.name, email }, isAuthenticated: true, is2faVerified: false });
         localStorage.setItem("admin_email", email);
         get().addAuditLog("Login Attempt", `Login initiated by ${email}`);
     },
@@ -91,6 +100,7 @@ export const useStore = create<AppState>((set, get) => ({
         localStorage.removeItem("admin_token");
         localStorage.removeItem("admin_session_expiry");
         localStorage.removeItem("admin_email");
+        localStorage.removeItem("admin_profile");
         get().addAuditLog("Logout", `User ${get().user?.email} logged out.`);
         set({ user: null, isAuthenticated: false, is2faVerified: false });
     },
@@ -181,3 +191,5 @@ export const useStore = create<AppState>((set, get) => ({
 
     hideToast: () => set({ toastMessage: null })
 }));
+
+
